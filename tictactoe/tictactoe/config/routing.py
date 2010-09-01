@@ -20,9 +20,13 @@ def make_map(config):
 
     # CUSTOM ROUTES HERE
 
+    # TODO: append and redirect urls that don't end in a slash
     map.connect('/{controller}/{action}')
+    map.connect('/{controller}/{action}/')
     map.connect('/{controller}/{action}/{id}')
 
     map.connect('/', controller='main', action='index')
+
+    map.connect('/game/', controller='game', action='index')
 
     return map
