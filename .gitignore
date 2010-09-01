@@ -1,5 +1,6 @@
 *.pyc
 *.pyo
+*.mako.py
 development.ini
 production.ini
 
