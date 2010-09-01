@@ -1,0 +1,85 @@
+Description
+======================
+This is just a simple web app written in Python using Pylons to emulate the
+classic game of tic-tac-toe.
+
+It provides the ability to play versus an AI or a friend in real-time.
+The games themselves are stateful and saved, so they can take place over
+a minute or a year. Games played versus the AI are not automatically saved,
+but can be if requested.
+
+Users are also given the ability to choose different levels of AI, a "hint"
+function when playing versus the AI, a history browser of games versus a
+friend so that you can see who made what move when, and the option to
+broadcast the results of your game through various social networking sites
+like Twitter or Facebook.
+
+
+Technical Details
+======================
+Please reference the actual comments in the code itself for specifics of the
+implementation, so this will just be a general overview:
+
+The web app itself degrades gracefully for users with javascript 
+disabled. The javascript only enhances the original design by pushing the
+AI to the browser instead of the business logic, and by allowing games
+versus a friend to take place without ever reloading the page. To prevent
+having to periodically poll the server to check if your friend has made a 
+new move, we use COMET, specifically the long-polling technique.
+
+Games themselves are stored as a limitless list of turns (in theory, in
+practice a traditional game of 3x3 tic-tac-toe can only last up to 9
+moves). Turns are represented by a pair of bitmasks, each a condensed view
+of a player's board if it only had their character (X or O) on it. The
+first bitmask is for the player using X, the second for the player using O.
+
+The bitmask is computed by translating the positions of the board into a
+position of a bit in an integer, first left-to-right, then in a
+top-to-bottom manner. For example, the top-left square becomes 
+the left-most bit in the 9-bit integer. If the only move player X has made
+is to place an X in that top-left corner, their bitmask would be 100000000.
+Remember that as stated above, the other player's moves are ignored. If in a
+different game player O had won in three moves, making a line from the
+top-right corner to the bottom-left, their bitmask would be 001010100,
+regardless of the moves player X had happened to make.
+
+Please refer to the following diagrams:
+
+An empty board:
+___|___|___         Player X: 000000000 -> 0
+___|___|___         Player O: 000000000 -> 0
+   |   |   
+
+A complete game (tie):
+_X_|_O_|_O_         Player X: 100011010 -> 282
+_O_|_X_|_X_         Player O: 011100101 -> 229
+ O | X | O 
+
+As exemplified above, the bitmasks are computed into the integers they
+represent when being passed around, say through the URL or an AJAX
+request. The advantage of this "bitmask" method, despite rarely
+using the binary representations in actual arithmatic, is this app could
+easily be adapted to accomodate larger boards like a 5x5 or 7x7 game, or
+even into the 3-D space so long as a consistent scheme is used.
+
+The business logic in the back-end always ensures that a move is legal
+before saving the state of the game and/or passing it on to your fellow
+player. The front-end move-checker is merely for convenience.
+
+
+Installation and Setup
+======================
+
+Install ``tictactoe`` using easy_install::
+
+    easy_install tictactoe
+
+Make a config file as follows::
+
+    paster make-config tictactoe config.ini
+
+Tweak the config file as appropriate and then setup the application::
+
+    paster setup-app config.ini
+
+Then you are ready to go.
