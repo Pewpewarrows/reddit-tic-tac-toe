@@ -3,6 +3,8 @@
 *.*.py
 .project
 *.db
+*.cache
+*.lock
 development.ini
 production.ini
 

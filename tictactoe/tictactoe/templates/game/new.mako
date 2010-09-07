@@ -1,7 +1,7 @@
 <%inherit file="/base.mako"/>
 
 <%!
-    from tictactoe.lib.filters import move_to_img
+    from tictactoe.lib.filters import move_to_img, i_to_b
 %>
 
 <%def name="title()">
@@ -12,8 +12,10 @@ New Game |
 Tic-Tac-Toe!
 </%def>
 
-${c.board_size}
-${c.positions}
+<form action="." method="post">
+    <input type="hidden" name="reset" value="true"/>
+    <input type="submit" value="Reset Game"/>
+</form>
 
 <table id="game-table">
     % for r in range(c.board_size):
@@ -28,7 +30,11 @@ ${c.positions}
         % else:
         <td>
         % endif
-        ${c.positions[r][i] | move_to_img}</td>
+        <form action="." method="post">
+        <input type="hidden" name="move" value="${(1 << ((c.board_size**2) - (r * c.board_size + i) - 1)) | i_to_b}"/>
+        ${c.positions[r][i] | move_to_img}
+        </form>
+        </td>
         % endfor
     </tr>
     % endfor

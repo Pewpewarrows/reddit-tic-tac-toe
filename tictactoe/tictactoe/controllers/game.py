@@ -1,10 +1,11 @@
 import logging
-import random
+from random import randrange
 
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 
 from tictactoe.lib.base import BaseController, render, Session
+from tictactoe.lib.game import ai_move, add_move, int_to_bin, is_legal_move
 from tictactoe.model import Game
 
 log = logging.getLogger(__name__)
@@ -22,34 +23,67 @@ class GameController(BaseController):
         # which is what we'll end up doing for AI games pre-save.
         # We'll be hitting the database on versus game starts though,
         # or if the user decides to 'save' an AI game.
-        
-        # If there's a POST request, we're already mid-game.
 
-        # New games for now randomly pick between you or AI starting
-        coin_toss = random.randrange(2)
-
-        # Only supporting same-sized edges boards for now
+        # Only supporting same-sized edged boards for now
         board_size = 3
         x_pos_bin = '000000000'
         o_pos_bin = '000000000'
         x_pos = 0
-        y_pos = 0
+        o_pos = 0
 
         # TODO: actually implement difficulty levels
         # AI difficulty from 0..2, with 0 being least difficult
         ai_level = 0
 
-        # 0: AI goes first, 1: You go first
-        # X is for the player going first
-        if coin_toss == 0:
-            x_pos |= int('000010000', 2)
-            x_pos_bin = bin(x_pos)[2:]
+        # An option to clear the session's game cache for a fresh start
+        if 'reset' in request.POST and request.POST['reset'] == 'true':
+            session.clear()
 
-            while len(x_pos_bin) < board_size**2:
-                x_pos_bin = '0' + x_pos_bin
+        # If there's a POST request or we see session variables from a
+        # previous game, we're already mid-game.
+        # TODO: if move and reset are both in POST, this breaks
+        if ('move' in request.POST) or ('game' in session):
+            board_size = session['size']
+            x_pos = session['x_pos']
+            o_pos = session['o_pos']
+            user_side = session['user_side']
+            ai_level = session['ai_level']
+            x_pos_bin = int_to_bin(x_pos, board_size)
+            o_pos_bin = int_to_bin(o_pos, board_size)
+
+            if 'move' in request.POST:
+                if is_legal_move(x_pos, o_pos, request.POST['move']):
+                    if user_side == 'X':
+                        x_pos, x_pos_bin = add_move(x_pos, request.POST['move'], board_size)
+                        o_move = ai_move(ai_level, o_pos, x_pos, board_size)
+                        o_pos, o_pos_bin = add_move(o_pos, o_move, board_size)
+                    else:
+                        o_pos, o_pos_bin = add_move(o_pos, request.POST['move'], board_size)
+                        x_move = ai_move(ai_level, x_pos, o_pos, board_size)
+                        x_pos, x_pos_bin = add_move(x_pos, x_move, board_size)
+        else:
+            # New games for now randomly pick between you or AI starting
+            coin_toss = randrange(2)
+
+            # 0: AI goes first, 1: You go first
+            # X is for the player going first
+            if coin_toss == 0:
+                user_side = 'O'
+                # Eventually use ai_move, for now assume always go center
+                x_pos, x_pos_bin = add_move(x_pos, '000010000', board_size)
+            else:
+                user_side = 'X'
 
         x_pos = int(x_pos_bin, 2)
         o_pos = int(o_pos_bin, 2)
+
+        session['game'] = True
+        session['size'] = board_size
+        session['x_pos'] = x_pos
+        session['o_pos'] = o_pos
+        session['user_side'] = user_side
+        session['ai_level'] = ai_level
+        session.save()
 
         positions = []
         for i in range(board_size):
@@ -68,6 +102,7 @@ class GameController(BaseController):
         # variables, so I'm going with sticking them all at the end.
         c.board_size = board_size
         c.positions = positions
+        c.user_size = user_side
 
         return render('/game/new.mako')
 
