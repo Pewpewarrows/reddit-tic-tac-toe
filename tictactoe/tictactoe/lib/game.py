@@ -53,3 +53,13 @@ def int_to_bin(x, board_size):
 # space, which would yeild a 1 when AND'ed together.
 def is_legal_move(x_pos, o_pos, move):
     return (x_pos & o_pos & int(move, 2) == 0)
+
+def game_over(cur_pos):
+    # In the interest of time, I'm hard-coding all 3x3 win conditions
+    win_pos = [7, 56, 73, 84, 146, 273, 292, 448]
+
+    for w in win_pos:
+        if (w & cur_pos) == w:
+            return True
+
+    return False

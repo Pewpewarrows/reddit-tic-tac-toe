@@ -17,6 +17,8 @@ Tic-Tac-Toe!
     <input type="submit" value="Reset Game"/>
 </form>
 
+${c.message}
+
 <table id="game-table">
     % for r in range(c.board_size):
     % if r == 0 or r == 1:
@@ -30,10 +32,14 @@ Tic-Tac-Toe!
         % else:
         <td>
         % endif
+        % if not c.finished:
         <form action="." method="post">
         <input type="hidden" name="move" value="${(1 << ((c.board_size**2) - (r * c.board_size + i) - 1)) | i_to_b}"/>
+        % endif
         ${c.positions[r][i] | move_to_img}
+        % if not c.finished:
         </form>
+        % endif
         </td>
         % endfor
     </tr>

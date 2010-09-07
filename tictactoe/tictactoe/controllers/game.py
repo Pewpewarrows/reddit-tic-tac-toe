@@ -5,7 +5,7 @@ from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 
 from tictactoe.lib.base import BaseController, render, Session
-from tictactoe.lib.game import ai_move, add_move, int_to_bin, is_legal_move
+from tictactoe.lib.game import ai_move, add_move, int_to_bin, is_legal_move, game_over
 from tictactoe.model import Game
 
 log = logging.getLogger(__name__)
@@ -30,6 +30,8 @@ class GameController(BaseController):
         o_pos_bin = '000000000'
         x_pos = 0
         o_pos = 0
+        finished = False
+        message = ''
 
         # TODO: actually implement difficulty levels
         # AI difficulty from 0..2, with 0 being least difficult
@@ -48,19 +50,35 @@ class GameController(BaseController):
             o_pos = session['o_pos']
             user_side = session['user_side']
             ai_level = session['ai_level']
+            finished = session['finished']
+            message = session['message']
             x_pos_bin = int_to_bin(x_pos, board_size)
             o_pos_bin = int_to_bin(o_pos, board_size)
 
-            if 'move' in request.POST:
+            if (not finished) and ('move' in request.POST):
                 if is_legal_move(x_pos, o_pos, request.POST['move']):
                     if user_side == 'X':
                         x_pos, x_pos_bin = add_move(x_pos, request.POST['move'], board_size)
-                        o_move = ai_move(ai_level, o_pos, x_pos, board_size)
-                        o_pos, o_pos_bin = add_move(o_pos, o_move, board_size)
+                        if game_over(x_pos):
+                            finished = True
+                            message = 'You win!'
+                        else:
+                            o_move = ai_move(ai_level, o_pos, x_pos, board_size)
+                            o_pos, o_pos_bin = add_move(o_pos, o_move, board_size)
+                            if game_over(o_pos):
+                                finished = True
+                                message = 'You lose!'
                     else:
                         o_pos, o_pos_bin = add_move(o_pos, request.POST['move'], board_size)
-                        x_move = ai_move(ai_level, x_pos, o_pos, board_size)
-                        x_pos, x_pos_bin = add_move(x_pos, x_move, board_size)
+                        if game_over(o_pos):
+                            finished = True
+                            message = 'You win!'
+                        else:
+                            x_move = ai_move(ai_level, x_pos, o_pos, board_size)
+                            x_pos, x_pos_bin = add_move(x_pos, x_move, board_size)
+                            if game_over(x_pos):
+                                finished = True
+                                message = 'You lose!'
         else:
             # New games for now randomly pick between you or AI starting
             coin_toss = randrange(2)
@@ -83,6 +101,8 @@ class GameController(BaseController):
         session['o_pos'] = o_pos
         session['user_side'] = user_side
         session['ai_level'] = ai_level
+        session['finished'] = finished
+        session['message'] = message
         session.save()
 
         positions = []
@@ -103,6 +123,8 @@ class GameController(BaseController):
         c.board_size = board_size
         c.positions = positions
         c.user_size = user_side
+        c.finished = finished
+        c.message = message
 
         return render('/game/new.mako')
 
