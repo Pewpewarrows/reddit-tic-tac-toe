@@ -15,11 +15,20 @@ Tic-Tac-Toe!
 ${c.board_size}
 ${c.positions}
 
-<table>
+<table id="game-table">
     % for r in range(c.board_size):
+    % if r == 0 or r == 1:
+    <tr class="bottom-bord">
+    % else:
     <tr>
+    % endif
         % for i in range(c.board_size):
-        <td>${c.positions[r][i] | move_to_img}</td>
+        % if i == 0 or i == 1:
+        <td class="right-bord">
+        % else:
+        <td>
+        % endif
+        ${c.positions[r][i] | move_to_img}</td>
         % endfor
     </tr>
     % endfor

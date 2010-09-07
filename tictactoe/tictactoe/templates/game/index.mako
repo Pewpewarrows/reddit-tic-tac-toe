@@ -8,4 +8,5 @@ Game |
 Tic-Tac-Toe!
 </%def>
 
-<a href="/game/new/">New Game</a>
+<a href="/game/new/ai/">New AI Game</a>
+<a href="/game/new/versus/">New Versus Game</a>

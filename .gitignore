@@ -2,6 +2,7 @@
 *.pyo
 *.*.py
 .project
+*.db
 development.ini
 production.ini
 

@@ -21,6 +21,8 @@ def make_map(config):
     # CUSTOM ROUTES HERE
 
     # TODO: append and redirect urls that don't end in a slash
+    # Also: should I remove these convenience maps to prevent two URLs
+    # from pointing to the same page?
     map.connect('/{controller}/{action}')
     map.connect('/{controller}/{action}/')
     map.connect('/{controller}/{action}/{id}')
@@ -28,5 +30,8 @@ def make_map(config):
     map.connect('/', controller='main', action='index')
 
     map.connect('/game/', controller='game', action='index')
+    map.connect('/game/new/ai/', controller='game', action='new_ai')
+    map.connect('/game/new/versus/', controller='game', action='new_versus')
+    map.connect('/game/{id}/', controller='game', action='continue')
 
     return map

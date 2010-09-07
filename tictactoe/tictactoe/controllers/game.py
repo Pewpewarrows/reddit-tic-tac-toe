@@ -4,21 +4,24 @@ import random
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 
-from tictactoe.lib.base import BaseController, render
+from tictactoe.lib.base import BaseController, render, Session
+from tictactoe.model import Game
 
 log = logging.getLogger(__name__)
 
 class GameController(BaseController):
 
+    def __before__(self):
+        self.game_q = Session.query(Game)
+
     def index(self):
         return render('/game/index.mako')
 
-    def new(self):
-        # TODO: Choose between AI and Human
-
+    def new_ai(self):
         # For now, just start an AI game and store it in session,
         # which is what we'll end up doing for AI games pre-save.
-        # We'll be hitting the database on versus game starts though.
+        # We'll be hitting the database on versus game starts though,
+        # or if the user decides to 'save' an AI game.
         
         # If there's a POST request, we're already mid-game.
 
@@ -38,7 +41,7 @@ class GameController(BaseController):
 
         # 0: AI goes first, 1: You go first
         # X is for the player going first
-        if True or coin_toss == 0:
+        if coin_toss == 0:
             x_pos |= int('000010000', 2)
             x_pos_bin = bin(x_pos)[2:]
 
@@ -67,10 +70,6 @@ class GameController(BaseController):
         c.positions = positions
 
         return render('/game/new.mako')
-
-    def new_ai(self):
-        # Create a new AI game ID and redirect to it
-        pass
 
     def new_versus(self):
         # Create a new Human Versus game ID and redirect to it
