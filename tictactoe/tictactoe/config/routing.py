@@ -30,7 +30,8 @@ def make_map(config):
     map.connect('/', controller='main', action='index')
 
     map.connect('/game/', controller='game', action='index')
-    map.connect('/game/new/ai/', controller='game', action='new_ai')
+    map.connect('/game/new/ai/', controller='game', action='new_ai_choose')
+    map.connect('/game/new/ai/{diff}/', controller='game', action='new_ai')
     map.connect('/game/new/versus/', controller='game', action='new_versus')
     map.connect('/game/{id}/', controller='game', action='continue')
 

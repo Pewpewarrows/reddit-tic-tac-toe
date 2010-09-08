@@ -18,7 +18,10 @@ class GameController(BaseController):
     def index(self):
         return render('/game/index.mako')
 
-    def new_ai(self):
+    def new_ai_choose(self):
+        return render('/game/diff.mako')
+
+    def new_ai(self, diff):
         # For now, just start an AI game and store it in session,
         # which is what we'll end up doing for AI games pre-save.
         # We'll be hitting the database on versus game starts though,
@@ -33,13 +36,21 @@ class GameController(BaseController):
         finished = False
         message = ''
 
-        # TODO: actually implement difficulty levels
         # AI difficulty from 0..2, with 0 being least difficult
-        ai_level = 0
+        if diff == 'easy':
+            ai_level = 0
+        elif diff == 'med':
+            ai_level = 1
+        elif diff == 'hard':
+            ai_level = 2
+        else:
+            return redirect('/game/new/ai/')
 
         # An option to clear the session's game cache for a fresh start
         if 'reset' in request.POST and request.POST['reset'] == 'true':
             session.clear()
+            session.save()
+            return redirect('/game/new/ai/')
 
         # If there's a POST request or we see session variables from a
         # previous game, we're already mid-game.
