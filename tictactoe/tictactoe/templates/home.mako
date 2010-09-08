@@ -8,4 +8,5 @@ Home |
 Tic-Tac-Toe!
 </%def>
 
-Hello gamers!
+<a href="/game/new/ai/"><button class="big-button">Play the Computer!</button></a>
+<a href="/game/new/versus/"><button class="big-button">Play Versus a Friend!</button></a>

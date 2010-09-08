@@ -82,11 +82,13 @@
 	<header>
 		<div class="mini-wrap">
 		<h1><a class="ir" href="/">Tic-Tac-Toe</a></h1>
+        <!--
 		<nav>
 			<ul>
 				<li><a href="/game/">Play!</a></li>
 			</ul>
 		</nav>
+        -->
 		</div>
 	</header>
 	<section id="content">

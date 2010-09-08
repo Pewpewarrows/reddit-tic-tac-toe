@@ -12,12 +12,14 @@ New Game |
 Tic-Tac-Toe!
 </%def>
 
+<div class="message">${c.message}</div>
+
+<div id="controls">
 <form action="." method="post">
     <input type="hidden" name="reset" value="true"/>
     <input type="submit" value="Reset Game"/>
 </form>
-
-${c.message}
+</div>
 
 <table id="game-table">
     % for r in range(c.board_size):
@@ -32,12 +34,14 @@ ${c.message}
         % else:
         <td>
         % endif
-        % if not c.finished:
+        % if (not c.finished) and (c.positions[r][i] == ''):
         <form action="." method="post">
         <input type="hidden" name="move" value="${(1 << ((c.board_size**2) - (r * c.board_size + i) - 1)) | i_to_b}"/>
         % endif
+        % if (c.positions[r][i] != '') or ((not c.finished and c.positions[r][i] == '')):
         ${c.positions[r][i] | move_to_img}
-        % if not c.finished:
+        % endif
+        % if (not c.finished) and (c.positions[r][i] == ''):
         </form>
         % endif
         </td>

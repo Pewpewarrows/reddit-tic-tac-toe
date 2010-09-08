@@ -8,5 +8,5 @@ Game |
 Tic-Tac-Toe!
 </%def>
 
-<a href="/game/new/ai/">New AI Game</a>
-<a href="/game/new/versus/">New Versus Game</a>
+<a href="/game/new/ai/"><button class="big-button">Play the Computer!</button></a>
+<a href="/game/new/versus/"><button class="big-button">Play Versus a Friend!</button></a>       

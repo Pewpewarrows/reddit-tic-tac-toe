@@ -2,8 +2,20 @@
 @import url('scaffold.css');
 @import url('base_theme.css');
 
+#title h1 {
+    font-size: 3.0em;
+}
+
+#content, footer {
+    text-align: center;
+}
+
+#main {
+    padding-top: 20px;
+}
+
 #game-table {
-    margin: 0 auto;
+    margin: 20px auto;
 }
 
 #game-table td {
@@ -21,4 +33,30 @@
 
 #game-table td.right-bord {
     border-right: 2px solid #CCC;
+}
+
+.big-button {
+    width: 200px !important;
+    height: 80px !important;
+    margin: 10px 10px;
+    font-size: 1.4em;
+}
+
+.move-button {
+    width: 128px !important;
+    height: 128px !important;
+    border: 0px !important;
+    background-color: transparent !important;
+    color: transparent;
+}
+
+.message {
+    color: red;
+    font-size: 1.6em;
+}
+
+#controls {
+    position: absolute;
+    top: 20px;
+    right: 0;
 }

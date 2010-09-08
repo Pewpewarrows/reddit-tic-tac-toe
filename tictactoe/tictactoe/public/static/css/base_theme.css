@@ -26,9 +26,10 @@ header {
 }
 
 header h1 > a {
-	width: 128px;
+	width: 384px;
 	height: 128px;
-	background-image: url('/static/images/logo.png');
+    margin: 0 auto;
+	background-image: url('/static/images/ttt-logo.png');
 }
 
 nav {
