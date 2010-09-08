@@ -34,5 +34,6 @@ def make_map(config):
     map.connect('/game/new/ai/{diff}/', controller='game', action='new_ai')
     map.connect('/game/new/versus/', controller='game', action='new_versus')
     map.connect('/game/cont/{id}/', controller='game', action='cont_game')
+    map.connect('/game/cont/{id}/comet/', controller='game', action='long_poll')
 
     return map

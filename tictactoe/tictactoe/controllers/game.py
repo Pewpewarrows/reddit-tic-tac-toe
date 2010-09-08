@@ -3,6 +3,7 @@ from random import randrange
 
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
+from pylons.decorators import jsonify
 
 from tictactoe.lib.base import BaseController, render, Session
 from tictactoe.lib.game import ai_move, add_move, int_to_bin, is_legal_move, game_over, bit_count
@@ -140,6 +141,10 @@ class GameController(BaseController):
         c.user_side = user_side
         c.finished = finished
         c.message = message
+        c.this_url = request.environ.get('PATH_INFO')
+
+        if request.is_xhr:
+            return self.json(positions)
 
         return render('/game/new.mako')
 
@@ -183,7 +188,7 @@ class GameController(BaseController):
                 session['user_side'] = user_side
                 session.save()
 
-            if is_legal_move(x_pos, o_pos, request.POST['move'], user_side):
+            if (not game_over(x_pos)) and (not game_over(o_pos)) and is_legal_move(x_pos, o_pos, request.POST['move'], user_side):
                 if user_side == 'X':
                     x_pos, x_pos_bin = add_move(x_pos, request.POST['move'], board_size)
                     game.x_pos = x_pos
@@ -228,5 +233,75 @@ class GameController(BaseController):
         c.message = message
         c.this_url = request.environ.get('PATH_INFO')
         # c.this_url = url.current(qualified=False)
+
+        if request.is_xhr:
+            return self.json(positions)
         
         return render('/game/continue.mako')
+
+    @jsonify
+    def json(self, data):
+        return dict(result=data)
+
+    @jsonify
+    def long_poll(self, id):
+        from datetime import datetime
+        from time import sleep
+
+        start = datetime.now()
+
+        if 'my_board' in request.POST:
+            my_board = request.POST['my_board']
+            my_board = int(my_board, 2)
+        else:
+            return ''
+
+        game = self.game_q.filter_by(id=id).first()
+
+        while True:
+            Session.refresh(game)
+            if not game:
+                return ''
+
+            board_size = game.size
+            x_pos = game.x_pos
+            o_pos = game.o_pos
+            cur_board = x_pos | o_pos
+            data = {}
+
+            if cur_board > my_board:
+                x_pos_bin = int_to_bin(x_pos, board_size)
+                o_pos_bin = int_to_bin(o_pos, board_size)
+
+                positions = []
+                for i in range(board_size):
+                    positions.append([])
+
+                    for j in range(board_size):
+                        if x_pos_bin[(i*board_size)+j] == '1':
+                            positions[i].append('X')
+                        elif o_pos_bin[(i*board_size)+j] == '1':
+                            positions[i].append('O')
+                        else:
+                            positions[i].append('')
+
+                data['result'] = positions
+
+            if bit_count(cur_board) == (board_size**2):
+                data['message'] = 'It\'s a tie!'
+
+            if game_over(x_pos):
+                data['message'] = 'X Wins!'
+            elif game_over(o_pos):
+                data['message'] = 'O Wins!'
+
+            if len(data) > 0:
+                return data
+            
+            sleep(1)
+
+            delta = datetime.now() - start
+            if delta.seconds >= 30:
+                return {'again': True}
+
+        return ''

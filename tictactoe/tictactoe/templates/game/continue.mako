@@ -8,15 +8,63 @@
 Continue Game | 
 </%def>
 
-<%def name="extrahead()">
-<meta http-equiv="refresh" content="30"/>
-</%def>
-
 <%def name="h1()">
 Tic-Tac-Toe!
 </%def>
 
-<div>Tell your friend to visit <a href="${c.this_url}">this link</a> to play!</a></div>
+<%def name="extrascript()">
+<noscript>
+    <meta http-equiv="refresh" content="30"/>
+</noscript>
+
+<script type="text/javascript">
+function comet_poll(first) {
+    $.post('${c.this_url}comet/', {
+        my_board: TicTacToe.gen_bitmask()
+    }, function(data) {
+        if (first && TicTacToe.ignore) {
+            return;
+        }
+
+        if (data.again == true) {
+            setTimeout(comet_poll, 1);
+        } else if (data.result || data.message) {
+            if (data.message) {
+                $('.message').html(data.message);
+            }
+
+            if (data.result) {
+                TicTacToe.parse(data.result);
+            }
+
+            TicTacToe.ignore = true;
+        }
+    });
+}
+
+$(function() {
+    TicTacToe.ignore = false;
+
+    $('meta[http-equiv="refresh"]').remove();
+
+    $('form.game-move').live('submit', function() {
+        $.post('${c.this_url}', {
+            move: $('input[name="move"]', this).val()
+        }, function(data) {
+            TicTacToe.parse(data.result);
+            TicTacToe.ignore = true;
+            comet_poll(false);
+        });
+
+        return false;
+    });
+
+    comet_poll(true);
+});
+</script>
+</%def>
+
+<div>Tell your friend to visit <a href="${c.this_url}">this link</a> to play!</div>
 
 <div class="message">${c.message}</div>
 
@@ -43,7 +91,7 @@ Tic-Tac-Toe!
         <td>
         % endif
         % if (not c.finished) and (c.positions[r][i] == ''):
-        <form action="." method="post">
+        <form class="game-move" action="." method="post">
         <input type="hidden" name="move" value="${(1 << ((c.board_size**2) - (r * c.board_size + i) - 1)) | i_to_b}"/>
         % endif
         % if (c.positions[r][i] != '') or ((not c.finished and c.positions[r][i] == '')):

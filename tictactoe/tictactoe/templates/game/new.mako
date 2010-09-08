@@ -12,6 +12,35 @@ New Game |
 Tic-Tac-Toe!
 </%def>
 
+<%def name="extrascript()">
+<script type="text/javascript">
+function comet_poll() {
+    $.post('${c.this_url}comet/', {
+        my_board: TicTacToe.gen_bitmask()
+    }, function(data) {
+        if (data.again == true) {
+            setTimeout(comet_poll, 1);
+        } else if (data.results) {
+            TicTacToe.parse(data.results);
+        }
+    });
+}
+
+$(function() {
+    $('form.game-move').live('submit', function() {
+        $.post('${c.this_url}', {
+            move: $('input[name="move"]', this).val()
+        }, function(data) {
+            TicTacToe.parse(data.result);
+        });
+
+        return false;
+    });
+});
+</script>
+</%def>
+
+
 <div class="message">${c.message}</div>
 
 <div id="controls">
@@ -35,7 +64,7 @@ Tic-Tac-Toe!
         <td>
         % endif
         % if (not c.finished) and (c.positions[r][i] == ''):
-        <form action="." method="post">
+        <form class="game-move" action="." method="post">
         <input type="hidden" name="move" value="${(1 << ((c.board_size**2) - (r * c.board_size + i) - 1)) | i_to_b}"/>
         % endif
         % if (c.positions[r][i] != '') or ((not c.finished and c.positions[r][i] == '')):
