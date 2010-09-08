@@ -52,6 +52,9 @@ def int_to_bin(x, board_size):
 # greater than 1. The only illegal move is that on an already-occupied
 # space, which would yeild a 1 when AND'ed together.
 def is_legal_move(x_pos, o_pos, move):
+    if bit_count(int(move, 2)) > 1:
+        return false
+
     return (x_pos & o_pos & int(move, 2) == 0)
 
 def game_over(cur_pos):
@@ -63,3 +66,12 @@ def game_over(cur_pos):
             return True
 
     return False
+
+# http://wiki.python.org/moin/BitManipulation
+def bit_count(num):
+    count = 0
+    while (num):
+        num &= num - 1
+        count += 1
+
+    return count

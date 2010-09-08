@@ -5,7 +5,7 @@ from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 
 from tictactoe.lib.base import BaseController, render, Session
-from tictactoe.lib.game import ai_move, add_move, int_to_bin, is_legal_move, game_over
+from tictactoe.lib.game import ai_move, add_move, int_to_bin, is_legal_move, game_over, bit_count
 from tictactoe.model import Game
 
 log = logging.getLogger(__name__)
@@ -79,6 +79,10 @@ class GameController(BaseController):
                             if game_over(x_pos):
                                 finished = True
                                 message = 'You lose!'
+
+                    if not finished and (bit_count(x_pos | o_pos) == board_size**2):
+                        finished = True
+                        message = 'It\'s a tie!'
         else:
             # New games for now randomly pick between you or AI starting
             coin_toss = randrange(2)
