@@ -22,7 +22,7 @@ class Game(Base):
     def __init__(self, id='', size=3, x_pos=0, o_pos=0, versus=False):
         # I'm lazy, sue me
         if id == '':
-            id = self.generate_hash
+            id = self.generate_hash()
 
         self.id = id
         self.size = size

@@ -51,6 +51,7 @@
 }
 
 .message {
+    margin-top: 10px;
     color: red;
     font-size: 1.6em;
 }

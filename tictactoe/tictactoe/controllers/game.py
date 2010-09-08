@@ -137,7 +137,7 @@ class GameController(BaseController):
         # variables, so I'm going with sticking them all at the end.
         c.board_size = board_size
         c.positions = positions
-        c.user_size = user_side
+        c.user_side = user_side
         c.finished = finished
         c.message = message
 
@@ -145,4 +145,88 @@ class GameController(BaseController):
 
     def new_versus(self):
         # Create a new Human Versus game ID and redirect to it
-        pass
+        game = Game(versus=True)
+        game_id = game.id
+        Session.add(game)
+        Session.commit()
+
+        return redirect('/game/cont/%s/' % game_id)
+
+    def cont_game(self, id):
+        # Continue an existing Human Versus game
+        game = self.game_q.filter_by(id=id).first()
+        if not game:
+            return redirect('/')
+
+        message = ''
+        user_side = ''
+        finished = False
+        board_size = game.size
+        x_pos = game.x_pos
+        o_pos = game.o_pos
+        x_pos_bin = int_to_bin(x_pos, board_size)
+        o_pos_bin = int_to_bin(o_pos, board_size)
+
+        if 'user_side' in session:
+            user_side = session['user_side']
+
+        if 'move' in request.POST:
+            if user_side == '':
+                # Determine your side by the person whose turn it should be
+                # Note: I have no idea what security issues this raises
+                # should one user maliciously and purposfully clear their
+                # cookies.
+                if bit_count(x_pos) <= bit_count(o_pos):
+                    user_side = 'X'
+                else:
+                    user_side = 'O'
+                session['user_side'] = user_side
+                session.save()
+
+            if is_legal_move(x_pos, o_pos, request.POST['move'], user_side):
+                if user_side == 'X':
+                    x_pos, x_pos_bin = add_move(x_pos, request.POST['move'], board_size)
+                    game.x_pos = x_pos
+                    Session.commit()
+                else:
+                    o_pos, o_pos_bin = add_move(o_pos, request.POST['move'], board_size)
+                    game.o_pos = o_pos
+                    Session.commit()
+
+        if game_over(x_pos):
+            finished = True
+            if user_side == 'X':
+                message = 'You win!'
+            elif user_side == 'O':
+                message = 'You lose!'
+        elif game_over(o_pos):
+            finished = True
+            if user_side == 'O':
+                message = 'You win!'
+            elif user_side == 'X':
+                message = 'You lose!'
+        elif bit_count(x_pos | o_pos) == (board_size**2):
+            finished = True
+            message = 'It\'s a tie!'
+
+        positions = []
+        for i in range(board_size):
+            positions.append([])
+
+            for j in range(board_size):
+                if x_pos_bin[(i*board_size)+j] == '1':
+                    positions[i].append('X')
+                elif o_pos_bin[(i*board_size)+j] == '1':
+                    positions[i].append('O')
+                else:
+                    positions[i].append('')
+
+        c.board_size = board_size
+        c.positions = positions
+        c.user_side = user_side
+        c.finished = finished
+        c.message = message
+        c.this_url = request.environ.get('PATH_INFO')
+        # c.this_url = url.current(qualified=False)
+        
+        return render('/game/continue.mako')

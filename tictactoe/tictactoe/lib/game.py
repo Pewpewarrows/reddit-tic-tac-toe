@@ -135,9 +135,15 @@ def int_to_bin(x, board_size):
 # A move is illegal if the bitwise AND of it with the current board is 
 # greater than 1. The only illegal move is that on an already-occupied
 # space, which would yeild a 1 when AND'ed together.
-def is_legal_move(x_pos, o_pos, move):
-    if bit_count(int(move, 2)) > 1:
+def is_legal_move(x_pos, o_pos, move, user_side=None):
+    if bit_count(int(move, 2)) != 1:
         return false
+
+    if user_side:
+        if user_side == 'X' and (bit_count(x_pos) > bit_count(o_pos)):
+            return False
+        elif user_side == 'O' and (bit_count(o_pos) == bit_count(x_pos)):
+            return False
 
     return (x_pos & o_pos & int(move, 2) == 0)
 
