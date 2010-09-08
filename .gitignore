@@ -5,6 +5,7 @@
 *.db
 *.cache
 *.lock
+*.wsgi
 development.ini
 production.ini
 
