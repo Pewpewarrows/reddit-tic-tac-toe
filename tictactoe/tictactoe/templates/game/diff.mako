@@ -8,6 +8,18 @@ Choose Difficulty |
 Tic-Tac-Toe!
 </%def>
 
+<%def name="extrascript()">
+<script type="text/javascript">
+$(function() {
+    $('button.big-button').live('click', function() {
+        window.location.href =
+        $(this).closest('a').attr('href');
+    });
+});
+</script>
+</%def>
+
+
 <div class="message">Choose a difficulty!</div>
 <br/>
 <a href="/game/new/ai/easy/"><button class="big-button">Easy</button></a>

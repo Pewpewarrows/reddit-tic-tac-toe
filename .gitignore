@@ -6,6 +6,7 @@
 *.cache
 *.lock
 *.wsgi
+*.swp
 development.ini
 production.ini
 

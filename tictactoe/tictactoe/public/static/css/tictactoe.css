@@ -35,6 +35,10 @@
     border-right: 2px solid #CCC;
 }
 
+a {
+    text-decoration: none;
+}
+
 .big-button {
     width: 200px !important;
     height: 80px !important;

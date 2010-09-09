@@ -19,6 +19,8 @@ Tic-Tac-Toe!
 
 <script type="text/javascript">
 function comet_poll(first) {
+    TicTacToe.my_turn = false;
+
     $.post('${c.this_url}comet/', {
         my_board: TicTacToe.gen_bitmask()
     }, function(data) {
@@ -37,6 +39,7 @@ function comet_poll(first) {
                 TicTacToe.parse(data.result);
             }
 
+            TicTacToe.my_turn = true;
             TicTacToe.ignore = true;
         }
     });
@@ -44,6 +47,7 @@ function comet_poll(first) {
 
 $(function() {
     TicTacToe.ignore = false;
+    TicTacToe.my_turn = true;
 
     $('meta[http-equiv="refresh"]').remove();
 
@@ -53,13 +57,17 @@ $(function() {
         }, function(data) {
             TicTacToe.parse(data.result);
             TicTacToe.ignore = true;
-            comet_poll(false);
+
+            if (TicTacToe.my_turn) {
+                comet_poll(false);
+            }
         });
 
         return false;
     });
 
     comet_poll(true);
+    TicTacToe.my_turn = true;
 });
 </script>
 </%def>
