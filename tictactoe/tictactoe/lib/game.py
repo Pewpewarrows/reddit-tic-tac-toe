@@ -19,10 +19,6 @@ def ai_move(ai_level, ai_pos, user_pos, board_size):
 
         return ai_random_move(ai_pos, user_pos, board_size)
     elif ai_level == 2:
-        move = ai_block_move(ai_pos, user_pos, board_size)
-        if move:
-            return move
-
         # Really the only difference is that instead of random,
         # we attempt an aggressive move, which includes never 
         # choosing a side over a corner in early-game.
@@ -104,10 +100,27 @@ def ai_aggro_move(ai_pos, user_pos, board_size):
             if (cur_board & v) == 0:
                 return int_to_bin(v, board_size)
 
-    # Otherwise, go for a corner (playing the side early is the only
-    # way for someone to double-trap you).
-    corners = [256, 64, 4, 1]
+    # Now check for a blocking move
+    move = ai_block_move(ai_pos, user_pos, board_size)
+    if (move):
+        return move
 
+    # Grab the center!
+    if (cur_board & 16) == 0:
+        return int_to_bin(16, board_size)
+
+    corners = [256, 64, 4, 1]
+    sides = [128, 32, 8, 2]
+    surrounds = [257, 68]
+
+    # Hard-coded the only case where someone can beat this AI:
+    if (ai_pos == 16) and ((user_pos == surrounds[0]) or (user_pos == surrounds[1])):
+        for c in sides:
+            if (cur_board & c) == 0:
+                return int_to_bin(c, board_size)
+
+    # Otherwise, go for a corner (playing the side early is ~ the only
+    # way for someone to double-trap you).
     for c in corners:
         if (cur_board & c) == 0:
             return int_to_bin(c, board_size)
