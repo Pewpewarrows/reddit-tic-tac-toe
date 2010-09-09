@@ -20,6 +20,8 @@ class GameController(BaseController):
         return render('/game/index.mako')
 
     def new_ai_choose(self):
+        session.clear()
+        session.save()
         return render('/game/diff.mako')
 
     def new_ai(self, diff):
