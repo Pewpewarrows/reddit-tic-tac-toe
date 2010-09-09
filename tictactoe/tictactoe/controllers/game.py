@@ -174,11 +174,10 @@ class GameController(BaseController):
         x_pos_bin = int_to_bin(x_pos, board_size)
         o_pos_bin = int_to_bin(o_pos, board_size)
 
-        if 'user_side' in session:
-            user_side = session['user_side']
-
         if 'move' in request.POST:
-            if user_side == '':
+            if 'user_side' in session:
+                user_side = session['user_side']
+            elif user_side == '':
                 # Determine your side by the person whose turn it should be
                 # Note: I have no idea what security issues this raises
                 # should one user maliciously and purposfully clear their
