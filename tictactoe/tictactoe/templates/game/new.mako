@@ -14,22 +14,14 @@ Tic-Tac-Toe!
 
 <%def name="extrascript()">
 <script type="text/javascript">
-function comet_poll() {
-    $.post('${c.this_url}comet/', {
-        my_board: TicTacToe.gen_bitmask()
-    }, function(data) {
-        if (data.again == true) {
-            setTimeout(comet_poll, 1);
-        } else if (data.results) {
-            TicTacToe.parse(data.results);
-        }
-    });
-}
-
 $(function() {
-    $('form.game-move').live('submit', function() {
+    $('form.game-move').submit(function() {
+        var today = new Date();
+
         $.post('${c.this_url}', {
-            move: $('input[name="move"]', this).val()
+            move: $('input[name="move"]', this).val(),
+            // IE is such a piece of crap...
+            seed: (today.getTime() * Math.random())
         }, function(data) {
             TicTacToe.parse(data.result);
         });

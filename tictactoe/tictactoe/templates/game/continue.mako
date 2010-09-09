@@ -20,9 +20,12 @@ Tic-Tac-Toe!
 <script type="text/javascript">
 function comet_poll(first) {
     TicTacToe.my_turn = false;
+    var today = new Date();
 
     $.post('${c.this_url}comet/', {
-        my_board: TicTacToe.gen_bitmask()
+        my_board: TicTacToe.gen_bitmask(),
+        // Busting IE's AJAX cache...
+        seed: (today.getTime() * Math.random())
     }, function(data) {
         if (first && TicTacToe.ignore) {
             return;
@@ -52,8 +55,11 @@ $(function() {
     $('meta[http-equiv="refresh"]').remove();
 
     $('form.game-move').live('submit', function() {
+        var today = new Date();
         $.post('${c.this_url}', {
-            move: $('input[name="move"]', this).val()
+            move: $('input[name="move"]', this).val(),
+            // Busting IE's AJAX cache...
+            seed: (today.getTime() * Math.random())
         }, function(data) {
             TicTacToe.parse(data.result);
             TicTacToe.ignore = true;

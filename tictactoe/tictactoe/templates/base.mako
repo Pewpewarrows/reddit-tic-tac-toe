@@ -56,7 +56,6 @@
     ${self.extrahead()}
 
 	<!--[if lt IE 9]>
-	<script src="http://ie7-js.googlecode.com/svn/version/2.1(beta4)/IE9.js"></script>
 	<![endif]-->
 	
 	<!-- All JavaScript at the bottom, except for Analytics and Modernizr which enables HTML5 elements & feature detects -->
